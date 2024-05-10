@@ -9,6 +9,7 @@ var logger = require('morgan'); //middleware
 //takes the ROUTERS in our "routes" folder, we can add as wish etc
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+const cataglogRouter = require("./routes/catalog") //import routes for "catalog" area of site
 
 
 //create an app object , use it to set up the view engine
@@ -44,6 +45,7 @@ app.use(express.static(path.join(__dirname, 'public'))); //serve static files in
 //MIDDLEWARE has been set up, we can use() our routers as imported above
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use("/catalog",cataglogRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
