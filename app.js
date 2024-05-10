@@ -21,7 +21,7 @@ const mongoose = require("mongoose");
 mongoose.set("strictQuery",false);
 const mongoDB = "mongodb+srv://hiroc:430467Lol@cluster0.yfd1p7a.mongodb.net/?retryWrites=true&w=majority";
 
-mainModule().catch((err)=> console.log(err));
+main().catch((err)=> console.log(err));
 async function main() {
   await mongoose.connect(mongoDB);
 }
