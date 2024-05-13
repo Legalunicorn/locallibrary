@@ -36,7 +36,14 @@ exports.index = asyncHandler(async (req, res, next) => {
 
 // Display list of all books.
 exports.book_list = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Book list");
+  const allBooks = await Book.find({},"title author") //return only title and author values, along with id and virtual fields
+  //await function, pause the execution untol it is settled
+    .sort({title:1}) //sort the results by title
+    .populate("author") //will retrive the author information from author model, since currently its just refereced by the obkect
+    .exec();
+
+  //if the promise is fulfiled, the results are saved to all Books and the handler continues execution
+  res.render("book_list",{title:"Book List", book_list:allBooks})
 });
 
 // Display detail page for a specific book.
