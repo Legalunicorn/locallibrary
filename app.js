@@ -19,7 +19,7 @@ var app = express();
 // // Set up mongoose conneciton
 const mongoose = require("mongoose");
 mongoose.set("strictQuery",false);
-const mongoDB = "mongodb+srv://hiroc:430467Lol@cluster0.yfd1p7a.mongodb.net/?retryWrites=true&w=majority";
+const mongoDB = "mongodb+srv://hiroc:430467Lol@cluster0.yfd1p7a.mongodb.net/local_library?retryWrites=true&w=majority";
 
 main().catch((err)=> console.log(err));
 async function main() {
