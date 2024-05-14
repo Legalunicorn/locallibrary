@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
+const {DateTime} = require("luxon");
+
 const AuthorSchema = new Schema({
     first_name:{type:String, required:true,maxLength:100},
     family_name:{type:String, required:true},
@@ -28,6 +30,16 @@ AuthorSchema.virtual("name").get(function(){
 //vurtual for authors URL
 AuthorSchema.virtual("url").get(function(){
     return `/catalog/author/${this._id}`
+})
+
+AuthorSchema.virtual("lifespan").get(function(){
+    let dob,dod
+    if (this.date_of_birth)  dob = DateTime.fromJSDate(this.date_of_birth).toLocaleString(DateTime.DATE_MED)
+    else dob = ''
+    if (this.date_of_death)  dod = DateTime.fromJSDate(this.date_of_death).toLocaleString(DateTime.DATE_MED)
+    else dod = ''
+
+    return `${dob} - ${dod}`
 })
 
 

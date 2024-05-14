@@ -11,10 +11,10 @@ const BookSchema = new Schema({
 
 //virtual for books url
 BookSchema.virtual("url").get(function(){
-    return `/catelog/book/${this._id}`
+    return `/catalog/book/${this._id}`
 })
 
 
 //export model
 
-module.exports = mongoose.model("Book",BookSchema);
+module.exports = mongoose.model("Book",BookSchema); 
