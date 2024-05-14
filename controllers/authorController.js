@@ -97,12 +97,44 @@ exports.author_create_post = [
 
 // Display Author delete form on GET.
 exports.author_delete_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Author delete GET");
+  // res.send("NOT IMPLEMENTED: Author delete GET");
+  const [author, allBooksByAuthor] = await Promise.all([
+    Author.findById(req.params.id).exec(),
+    Book.find({author:req.params.id},"title summary").exec(),
+  ])
+
+  if (author===null){
+    //no results
+    res.redirect("/catalog/authors")
+  }
+  res.render("author_delete",{
+    title: "Delete Author",
+    author:author,
+    author_books: allBooksByAuthor
+  })
 });
 
 // Handle Author delete on POST.
 exports.author_delete_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Author delete POST");
+  // res.send("NOT IMPLEMENTED: Author delete POST");
+  const [author, allBooksByAuthor] = await Promise.all([
+    Author.findById(req.params.id).exec(),
+    Book.find({author:req.params.id},"title summary").exec(),
+  ])
+
+  if (allBooksByAuthor.length>0){
+    //author has books cannot delete it 
+    res.render("author_delete",{
+      title:"Delete Author",
+      author:author,
+      author_books: allBooksByAuthor
+    });
+    return;
+  } else{
+    //auhor has no books/ delete the object and redirect to list of authors
+    await Author.findByIdAndDelete(req.body.authorid);
+    res.redirect('/catalog/authors')
+  }
 });
 
 // Display Author update form on GET.

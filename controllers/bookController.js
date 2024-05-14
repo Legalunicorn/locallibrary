@@ -161,6 +161,7 @@ exports.book_create_post = [
 // Display book delete form on GET.
 exports.book_delete_get = asyncHandler(async (req, res, next) => {
   res.send("NOT IMPLEMENTED: Book delete GET");
+  // const [book. allAuthors, allGenres]
 });
 
 // Handle book delete on POST.
@@ -170,10 +171,77 @@ exports.book_delete_post = asyncHandler(async (req, res, next) => {
 
 // Display book update form on GET.
 exports.book_update_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Book update GET");
+  // res.send("NOT IMPLEMENTED: Book update GET");
+  const [book, allAuthors,allGenres] = await promise.all([
+    Book.findById(req.params.id).populate("author").exec(),
+    Author.find().sort({family_name:1}).exec(),
+    Genre.find().sort({name:1}).exec()
+  ])
+
+  if (book===null){
+    const err = new Error("Book not found")
+    err.status = 404;
+    return next(err);
+  }
+
+  //mark selected generes as checekd
+  allGenres.forEach(genre=>{
+    if (book.genre.includes(genre._id)) genre.checked="true"
+  })
+
+  res.render("book_form",{
+    title: "Update Book".
+    authors: allAuthors,
+    genres:allGenres,
+    book:book
+  })
+
+
 });
 
 // Handle book update on POST.
-exports.book_update_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Book update POST");
-});
+// exports.book_update_post = asyncHandler(async (req, res, next) => {
+//   // res.send("NOT IMPLEMENTED: Book update POST");
+// });
+
+exports.book_update_post  = [
+  //convert genre to array
+  (req,res,next) =>{
+    if (!Array.isArray(req.body.genre)){
+      req.body.genre = typeof req.body.genre=="undefined" ?[] : [req.body.genre]
+    }
+    next();
+  },
+
+  body("title","Title must not be empty.")
+    .trim().isLength({min:1}).escape(),
+  body("author","Author must not be empty.").trim().isLength({min:1}).escape(),
+  body("summary","Summary must not be empty.").trim().isLength({min:1}).escape(),
+  body("isbn","ISBN must not be empty").trim().isLength({min:1}).escape(),
+  body("genre.*").escape(),
+
+  //process request after validatio and sanitidatoin
+
+  asyncHandler(async (req,res,next)=>{
+    //extract validation erros 
+    const erros  = validationResult(req);
+    //create book object with escaped/trimmed data and old id
+
+    const book = new Book({
+      title:req.body.title,
+      author:req.body.author,
+      summary:req.body.summary,
+      isbn.req.body.isbn,
+      genre: typeof req.body.genre === "undefined" ? [] : req.body.genre,
+      _id: req.params.id, // THIS IS REQUIRED OR A NEW ID WILL BE ASSIGEND
+
+      if (!errors.isEmpty()){
+        //there are errors 
+        const[allAuthors, alLGenres] = await Promise.all([
+          Author.find().sort({family_name:1}).exec(),
+          Genre.find().sort({name:1}).exec()
+        ])
+      }
+    })
+  })
+]
