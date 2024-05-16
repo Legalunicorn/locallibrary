@@ -117,10 +117,63 @@ exports.bookinstance_delete_post = asyncHandler(async(req,res,next)=>{
 
 // Display BookInstance update form on GET.
 exports.bookinstance_update_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: BookInstance update GET");
+  // res.send("NOT IMPLEMENTED: BookInstance update GET");
+
+  //select from a list of books 
+  const [bookInstance, allBooks] = await Promise.all([
+    BookInstance.findById(req.params.id).populate("book").exec(),
+    Book.find().sort({title:1}).exec()
+  ]);
+
+  if (bookInstance===null){
+    const err = new Error("Book not found")
+    err.status = 404;
+    return next(err);
+  }
+
+  //
+  res.render("bookinstance_form",{
+    title:"Update book instance",
+    bookinstance: bookInstance,
+    selected_book: bookInstance.book._id,
+    book_list: allBooks
+  })
 });
 
 // Handle bookinstance update on POST.
-exports.bookinstance_update_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: BookInstance update POST");
-});
+exports.bookinstance_update_post = [
+  // res.send("NOT IMPLEMENTED: BookInstance update POST");
+  body("book","Book must be specified").trim().isLength({min:1}).escape(),
+  body("imprint","Imprint must be specified").trim().isLength({min:1}).escape(),
+  body("status").escape(),
+  body("due_back","Invalid date").optional({values:"falsy"}).isISO8601().toDate(),
+
+  asyncHandler(async(req,res,next)=>{
+    const errors = validationResult(req);
+    const bookInstance = new BookInstance({
+      book: req.body.book,
+      imprint: req.body.imprint,
+      status:req.body.status,
+      due_back: req.body.due_back,
+      _id: req.params.id //required
+    });
+    if (!errors.isEmpty()){
+      // const [bookInstance, allBooks] = await Promise.all([
+      //   BookInstance.findById(req.params.id).populate("book").exec(),
+      //   Book.find().sort({title:1}).exec()
+      // ]); //bookinstance exist bc we are already atthe post request from the get page, so no need to check if null
+      const allBooks = await Book.find({},"title").exec()
+      res.render("bookinstance_form",{
+        title:"Update book instance",
+        bookinstance:bookInstance,
+        book_list: allBooks,
+        selected_book: bookInstance.book._id,
+        errors: errors.array()
+      })
+      return;
+    } else {
+      await BookInstance.findByIdAndUpdate(req.params.id,bookInstance,{})
+      res.redirect(bookInstance.url);
+    }
+  }),
+];

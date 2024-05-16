@@ -89,20 +89,96 @@ exports.genre_create_post=[
 
 // Display Genre delete form on GET.
 exports.genre_delete_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Genre delete GET");
+  // res.send("NOT IMPLEMENTED: Genre delete GET");
+  const [genre,allBooksWithGenre] = await Promise.all([
+    Genre.findById(req.params.id).exec(),
+    Book.find({genre:req.params.id},"title summary").exec()
+  
+  ])
+
+  if (genre===null){
+    // no such genre with id in the params
+    res.redirect("/catalog/genres")
+  }
+
+  //render the delete form
+  res.render("genre_delete",{
+    //display all genres anyways because they should know
+    title: "Delete Genre",
+    genre: genre,
+    genre_books: allBooksWithGenre
+  })
 });
 
 // Handle Genre delete on POST.
 exports.genre_delete_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Genre delete POST");
+  // res.send("NOT IMPLEMENTED: Genre delete POST");
+
+  const [genre,allBooksWithGenre] = await Promise.all([
+    Genre.findById(req.params.id).exec(),
+    Book.find({genre:req.params.id},"title summary").exec()
+  ])
+
+  if (allBooksWithGenre.length>0){
+    res.render("author_delete",{
+      title: "Delete genre",
+      genre: genre,
+      genre_books: allBooksWithGenre
+    })
+    return;
+  } else{
+    await Genre.findByIdAndDelete(req.body.genreid);
+    res.redirect('/catalog/genres')
+  }
 });
 
 // Display Genre update form on GET.
 exports.genre_update_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Genre update GET");
+  // res.send("NOT IMPLEMENTED: Genre update GET");
+  const genre = await Genre.findById(req.params.id).exec();
+  if (genre===null){
+    //no such genre
+    const err = new Error("genre not found");
+    err.status = 404;
+    return next(err);
+  }
+
+  res.render("genre_form",{
+    title: "Update Genre",
+    genre:genre
+  })
 });
 
 // Handle Genre update on POST.
-exports.genre_update_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Genre update POST");
-});
+// exports.genre_update_post = asyncHandler(async (req, res, next) => {
+//   res.send("NOT IMPLEMENTED: Genre update POST");
+// });
+
+exports.genre_update_post = [
+  body("name", "Genre must be minimum 3 character")
+    .trim()
+    .isLength({min:3})
+    .escape(),
+
+
+  asyncHandler(async(req,res,next)=>{
+    const errors = validationResult(res);
+
+    const genre = new Genre({
+      name:req.body.name,
+      _id: req.params.id
+    })
+
+    if (!errors.isEmpty()){
+      res.render("genre_form",{
+        title: "Update Genre",
+        genre:genre,
+        errors: errors.array()
+      })
+      return;
+    } else{
+      await Genre.findByIdAndUpdate(req.params.id,genre)
+      res.redirect(genre.url);
+    }
+  })
+]

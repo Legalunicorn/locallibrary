@@ -15,11 +15,11 @@ block content
             div.form-group 
                 label(for='date_of_birth') Date of birth;
                 input#date_of_birth.form-control(type='date' name='date_of_birth'
-                value=(undefined===author ? '' :author.date_of_birth) )
+                value=(undefined===author ? '' :author.dob_yyyy_mm_dd) )
 
                 label(for='date_of_death') Date of death: 
-                input#date_of_death.form-control(type='date' name='date_of_birth'
-                value=(undefined==author ? '' :author.date_of_death))
+                input#date_of_death.form-control(type='date' name='date_of_death'
+                value=(undefined==author ? '' :author.dod_yyyy_mm_dd))
 
 
                 button.btn.btn-primary(type='submit') Submit 
@@ -28,7 +28,7 @@ block content
     if errors  
         ul 
             for error in errors 
-                li!=error.pug
+                li!= error.pug
                 
 
 
