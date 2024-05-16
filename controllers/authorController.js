@@ -91,7 +91,7 @@ exports.author_create_post = [
 
     } else{
       //valid date
-      await Author.save();
+      await author.save();
       res.redirect(author.url)
     }
   })
