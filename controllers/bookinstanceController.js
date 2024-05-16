@@ -2,6 +2,7 @@ const BookInstance = require("../models/bookinstance");
 const asyncHandler = require("express-async-handler");
 const {body, validationResult} = require("express-validator");
 const Book = require("../models/book");
+const book = require("../models/book");
 
 // Display list of all BookInstances.
 exports.bookinstance_list = asyncHandler(async (req, res, next) => {
@@ -83,13 +84,36 @@ exports.bookinstance_create_post = [
 
 // Display BookInstance delete form on GET.
 exports.bookinstance_delete_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: BookInstance delete GET");
+  // res.send("NOT IMPLEMENTED: BookInstance delete GET");
+  const bookinstance = await BookInstance.findById(req.params.id).exec();
+  if (bookinstance ===null){
+    //no result of such instance
+    res.redirect('/catalog/bookinstances');
+  }
+
+  //render delete page
+  res.render("bookinstance_delete",{
+    title: "Delete Book Instance",
+    book_instance: bookinstance
+  })
+
+
 });
 
-// Handle BookInstance delete on POST.
-exports.bookinstance_delete_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: BookInstance delete POST");
-});
+// Handle BookInstance delete on POST.,jdelete POST");
+// });
+exports.bookinstance_delete_post = asyncHandler(async(req,res,next)=>{
+  //get details of the book
+  //there is no need to get the bookinstnace details? becausethis was initially designed for an error amesage 
+  // const bookinstance = await BookInstance.findById(req.params.id).exec();
+  await BookInstance.findByIdAndDelete(req.body.bookinstanceid);
+  res.redirect("/catalog/bookinstances")
+
+  //is there a need for error handling? book instance has no dependencies 
+  // if (bookinstance===null){
+  //   //no
+  // }
+})
 
 // Display BookInstance update form on GET.
 exports.bookinstance_update_get = asyncHandler(async (req, res, next) => {

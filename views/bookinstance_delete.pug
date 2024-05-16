@@ -1,0 +1,27 @@
+extends layout 
+
+block content 
+
+    h1 #{title}
+
+    p #[strong Title:] 
+        a(href=book_instance.book.url) #{book_instance.book.title}
+    p #[strong Imprint: ] #{book_instance.imprint}
+    p #[strong Status: ]
+
+    if (book_instance.status=="Available")
+        span.text-sucess #{book_instance.status} 
+    else if book_instance.status=="Maintainance" 
+        span.text-danger #{book_instance.status} 
+    else 
+        span.text-warning #{book_instance.status}
+
+    hr 
+    p Do you really want to delete this book instance?
+
+    form(method='POST') 
+        div.form-group 
+            input#bookinstanceid.form-control(type='hidden', name='bookinstanceid',
+            value = book_instance._id)
+            button.btn.btn-primary(type='submit') Delete
+
