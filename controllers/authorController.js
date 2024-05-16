@@ -3,6 +3,8 @@ const Book = require("../models/book")
 const {body,validationResult} = require("express-validator")
 const asyncHandler = require("express-async-handler");
 
+const debug = require("debug")("author")
+
 // Display list of all Authors.
 exports.author_list = asyncHandler(async (req, res, next) => {
   // res.send("NOT IMPLEMENTED: Author list");

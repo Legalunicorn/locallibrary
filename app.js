@@ -6,20 +6,31 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan'); //middleware
 
 
+//ENV FILES
+require("dotenv").config();
+
+
 //takes the ROUTERS in our "routes" folder, we can add as wish etc
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const cataglogRouter = require("./routes/catalog") //import routes for "catalog" area of site
 
-
+const compression = require("compression")
+const helmet = require("helmet")
 //create an app object , use it to set up the view engine
 var app = express();
+
+const RateLimit = require("express-rate-limit");
+const limiter = RateLimit({
+  windowMs: 1* 60 * 1000, //1 minute
+  max: 30, 
+})
 
 
 // // Set up mongoose conneciton
 const mongoose = require("mongoose");
 mongoose.set("strictQuery",false);
-const mongoDB = "mongodb+srv://hiroc:430467Lol@cluster0.yfd1p7a.mongodb.net/local_library?retryWrites=true&w=majority";
+const mongoDB = process.env.MONGODB_URI;
 
 main().catch((err)=> console.log(err));
 async function main() {
@@ -39,6 +50,19 @@ app.use(logger('dev'));
 app.use(express.json()); //eg, this is used to populate req.body with form fields
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(compression());
+app.use(limiter);
+
+
+//add helmet to middleware chair
+app.use(
+  helmet.contentSecurityPolicy({
+    directives:{
+      "script-src":["'self'","code.jquery.com","cdn.jsdeliver.net"]
+    },
+  }),
+)
+
 app.use(express.static(path.join(__dirname, 'public'))); //serve static files in the "public" folder
 
 
